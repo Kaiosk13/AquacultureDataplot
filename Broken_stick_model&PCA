@@ -1,0 +1,38 @@
+library(vegan)
+
+# Conducting PCA
+pc <- prcomp(data[,-1:-8], scale. = TRUE)
+plot(pc, type = "l", main = "Scree plot")
+
+# Calculate the eigenvalues
+eigenvalues <- pc$sdev^2
+print(eigenvalues)
+
+# Filter the PCs which larger than 10%, >1
+pclarge <- which(pc$sdev^2 > 1)
+print(pclarge)
+
+# Create a vector of expected eigenvalues based on the broken-stick model
+  expected_eigenvalues <- numeric(length(eigenvalues))
+for(i in 1:length(eigenvalues)){
+  expected_eigenvalues[i] <- sum((1:i) / sum(1:i)) / i
+}
+
+# Create a data frame with the observed and expected eigenvalues
+  eigen_df <- data.frame(
+    PC = 1:length(eigenvalues),
+    Observed = eigenvalues,
+    Expected = expected_eigenvalues
+  )
+  
+# Plot the eigenvalues and expected eigenvalues
+  library(ggplot2)
+  ggplot(eigen_df, aes(x = PC)) +
+    geom_line(aes(y = Observed), color = "red") +
+    geom_line(aes(y = Expected), color = "blue") +
+    scale_x_continuous(name = "Principal Component") +
+    scale_y_continuous(name = "Eigenvalue") +
+    ggtitle("Scree plot with broken-stick model")
+
+#If the Observed value higher than expected, represent the Principal Components is/are statiscally significant
+#If the Observed value lower than expected, refers to the PCs is/are not statiscally significant
